@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sending_request">Sending request</string>
+    <string name="sent">Sent</string>
+    <string name="bytes">bytes</string>
+    <string name="receiving_response">Receiving response</string>
+    <string name="received">Received</string>
+    <string name="authentication_failed">Authentication failed</string>
+    <string name="failed">failed</string>
+    <string name="no_auth_token">Couldn\'t get auth token</string>
+    <string name="no_cookie">App engine provided no cookie</string>
+</resources>
