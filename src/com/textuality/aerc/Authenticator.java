@@ -176,10 +176,10 @@ public class Authenticator {
 
     private boolean getCookie(URL uri) {
         String href = uri.toString();
-        href = "https" + href.substring(href.indexOf(':') + 1); // TLS please 
+        href = "https" + href.substring(href.indexOf(':')); // TLS please 
         if (!href.endsWith("/"))
             href = href + "/";
-        href = uri.toString() + "_ah/login?continue=http://localhost/&auth=" + mToken;
+        href = href + "_ah/login?continue=http://localhost/&auth=" + mToken;
         HttpURLConnection conn = null;
         try {
             URL root = new URL(href);

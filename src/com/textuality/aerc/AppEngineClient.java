@@ -42,7 +42,7 @@ public class AppEngineClient {
      *  suitable for use on background threads with no access to an Activity. 
      * 
      * @param appURI The URI of the App Engine app you want to interact with, e.g. your-app.appspot.com
-     * @param account An 
+     * @param authToken AccountManager authtoken, e.g. from the token() method 
      * @param context Used to look up strings
      */
     public AppEngineClient(URL appURI, String authToken, Context context) {
