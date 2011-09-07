@@ -33,10 +33,10 @@ public class Authenticator {
      * Creates a new Google App Engine authenticator for the app at the indicated URI using the indicated Account.
      * 
      * This constructor does not actually perform authentication, so it could in principle be called on the UI
-     *  thread.  Authentication is performed lazily on the first call to addCookie(), or when explicitly requested
-     *  via setup(). Authentication is based on cookies provided by App Engine, which experience suggests 
-     *  have a lifetime of about 24 hours, starting from the first call to setup() or addCookie().  Thus a 
-     *  single Authenticator instance ought to be adequate to serve the needs of most REST dialogues.
+     *  thread.  Authentication is performed lazily on the first call to authenticate(), or when explicitly 
+     *  requested via setup(). Authentication is based on cookies provided by App Engine, which experience 
+     *  suggests have a lifetime of about 24 hours, starting from the first call to setup().  Thus a single 
+     *  Authenticator instance ought to be adequate to serve the needs of most REST dialogues.
      * 
      * @param activity Activity to be used, if necessary, to prompt for authentication
      * @param account Which android.accounts.Account to authenticate with
@@ -87,7 +87,7 @@ public class Authenticator {
     }
 
     /**
-     * Returns an Authentication token for use in backgroundSetup()
+     * Returns an Authentication token which has been set up and is ready for use.
      * @return the token, or null if authentication failed, in which case diagnostics are available
      *  via errorMessage().
      */
