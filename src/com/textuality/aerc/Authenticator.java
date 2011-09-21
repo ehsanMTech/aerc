@@ -9,14 +9,13 @@ import java.util.List;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
 /**
- * Performs authentication against Google App Engine apps using a Google Account already
+ * Performs authentication against of HTTP requests using a Google Account already
  *  present on the device.
  */
 public class Authenticator {
@@ -25,10 +24,10 @@ public class Authenticator {
     private AccountManager mManager;
     private String mToken;
     private String mErrorMessage;
-    private Activity mActivity;
+    private Context mContext;
     private URL mAppURI;
     private Account mAccount;
-
+    
     /**
      * Creates a new Google App Engine authenticator for the app at the indicated URI using the indicated Account.
      * 
@@ -42,8 +41,12 @@ public class Authenticator {
      * @param account Which android.accounts.Account to authenticate with
      * @param appURI For example, https://yourapp.appspot.com/
      */
-    public Authenticator(Context activity, Account account, URL appURI) {
-        mActivity = (Activity) activity;
+   public static Authenticator appEngineAuthenticator(Context activity, Account account, URL appURI) {
+        return new Authenticator(activity, account, appURI);
+    }
+
+    private Authenticator(Context activity, Account account, URL appURI) {
+        mContext = (Activity) activity;
         mManager = AccountManager.get(activity);
         mAppURI = appURI;
         mAccount = account;
@@ -56,12 +59,18 @@ public class Authenticator {
      *  authToken via an AccountManager call, or by creating an Authenticator in a context where
      *  user interaction is acceptable, and getting a token with token() after having called setup().
      *  
+     * @param context Used to retrieve strings for display
      * @param appURI
      * @param authToken
      */
-    public Authenticator(URL appURI, String authToken) {
+    public static Authenticator appEngineAuthenticator(Context context, URL appURI, String authToken) {
+        return new Authenticator(context, appURI, authToken);
+    }
+    
+    private Authenticator(Context context, URL appURI, String authToken) {
         mAppURI = appURI;
         mToken = authToken;
+        mContext = context;
     }
 
     /**
@@ -136,35 +145,17 @@ public class Authenticator {
         return getCookie(mAppURI);
     }
 
-    // Getting an auth token is an async process; you pass a callback, which gets called in another thread, 
-    //  potentially quite a while later if the system decides it needs to prompt the user for authent.  Thus 
-    //  the wait/notify dance here; callers' lives are easier if this call is made blocking/synchronous. 
-    private Object mSync = new Object();
     private boolean getToken(Account account) {
 
-        AccountManagerCallback<Bundle> tokenCallback =  new AccountManagerCallback<Bundle>() {
-            public void run(AccountManagerFuture<Bundle> future) {
-                try {
-                    Bundle bundle = future.getResult();
-                    mToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-                } catch (Exception e) {
-                    mErrorMessage = str(R.string.authentication_failed) + ": " + e.getLocalizedMessage();
-                } finally {
-                    synchronized (mSync) {
-                        mSync.notify();                            
-                    }
-                }
-            }
-        };
-
+        mToken = null;
+        AccountManagerFuture<Bundle> result = mManager.getAuthToken(account, "ah", null, (Activity) mContext, null, null);
         try {
-            synchronized(mSync) {
-                mManager.getAuthToken(account, "ah", null, mActivity, tokenCallback, null);
-                mSync.wait();
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Bundle bundle = result.getResult();
+            mToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+        } catch (Exception e) {
+            mErrorMessage = str(R.string.authentication_failed) + ": " + e.getLocalizedMessage();
         }
+
         if (mToken == null) {
             if (mErrorMessage == null)
                 mErrorMessage = str(R.string.no_auth_token);
@@ -216,6 +207,6 @@ public class Authenticator {
             ; // empty
     }
     private String str(int id) {
-        return mActivity.getString(id);
+        return mContext.getString(id);
     }
 }

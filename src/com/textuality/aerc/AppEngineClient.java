@@ -32,7 +32,7 @@ public class AppEngineClient {
      * @param context Used, if necessary, to prompt user for authentication
      */
     public AppEngineClient(URL appURI, Account account, Context context) {
-        mAuthenticator = new Authenticator(context, account, appURI);
+        mAuthenticator = Authenticator.appEngineAuthenticator(context, account, appURI);
         mContext = context;
     }
     
@@ -46,7 +46,7 @@ public class AppEngineClient {
      * @param context Used to look up strings
      */
     public AppEngineClient(URL appURI, String authToken, Context context) {
-        mAuthenticator = new Authenticator(appURI, authToken);
+        mAuthenticator = Authenticator.appEngineAuthenticator(context, appURI, authToken);
         mContext = context;
     }
 
