@@ -22,7 +22,7 @@ public class Authenticator {
 
     private String mCookie = null;
     private AccountManager mManager;
-    private String mToken;
+    private String mToken = null;
     private String mErrorMessage;
     private Context mContext;
     private URL mAppURI;
