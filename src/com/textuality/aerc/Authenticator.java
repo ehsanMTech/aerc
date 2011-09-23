@@ -1,3 +1,18 @@
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.textuality.aerc;
 
 import java.io.BufferedInputStream;
@@ -27,7 +42,7 @@ public class Authenticator {
     private Context mContext;
     private URL mAppURI;
     private Account mAccount;
-    
+
     /**
      * Creates a new Google App Engine authenticator for the app at the indicated URI using the indicated Account.
      * 
@@ -41,7 +56,7 @@ public class Authenticator {
      * @param account Which android.accounts.Account to authenticate with
      * @param appURI For example, https://yourapp.appspot.com/
      */
-   public static Authenticator appEngineAuthenticator(Context activity, Account account, URL appURI) {
+    public static Authenticator appEngineAuthenticator(Context activity, Account account, URL appURI) {
         return new Authenticator(activity, account, appURI);
     }
 
@@ -51,7 +66,7 @@ public class Authenticator {
         mAppURI = appURI;
         mAccount = account;
     }
-    
+
     /**
      * Creates a new Google App Engine authenticator for the app at the indicated URI using an
      *  AccountManager authToken. The form of the authenticator is guaranteed never to interact with the user, 
@@ -66,7 +81,7 @@ public class Authenticator {
     public static Authenticator appEngineAuthenticator(Context context, URL appURI, String authToken) {
         return new Authenticator(context, appURI, authToken);
     }
-    
+
     private Authenticator(Context context, URL appURI, String authToken) {
         mAppURI = appURI;
         mToken = authToken;
@@ -123,7 +138,7 @@ public class Authenticator {
 
         if (mCookie != null)
             return true;
-        
+
         // TODO - clean up test mode
         if (mAppURI.toString().startsWith("http://192.168")) {
             mCookie = "Testing=TRUE";
@@ -131,7 +146,7 @@ public class Authenticator {
             return true;
         }
         mErrorMessage = null;
-        
+
         // if we already have a token, though, that means we're a promise-not-to-prompt authenticator
         if (mToken == null) {
             if (!getToken(mAccount))
@@ -153,7 +168,10 @@ public class Authenticator {
             Bundle bundle = result.getResult();
             mToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
         } catch (Exception e) {
-            mErrorMessage = str(R.string.authentication_failed) + ": " + e.getLocalizedMessage();
+            mErrorMessage = str(R.string.authentication_failed) + ": " + e.getClass() + " / " + e.getLocalizedMessage();
+            for (StackTraceElement s : e.getStackTrace()) {
+                mErrorMessage += s.toString() + "\n";
+            }
         }
 
         if (mToken == null) {
@@ -178,12 +196,17 @@ public class Authenticator {
             conn.setInstanceFollowRedirects(false);
             eatStream(new BufferedInputStream(conn.getInputStream()));
             List<String> cookies = conn.getHeaderFields().get("Set-Cookie");
-            String cookieName = root.getProtocol().equals("https") ? "SACSID" : "ACSID";
-            for (String cookie : cookies) {
-                if (cookie.startsWith(cookieName)) {
-                    int semi = cookie.indexOf(';');
-                    mCookie = (semi == -1) ? cookie : cookie.substring(0, semi);
-                    break;
+            if (cookies == null) {
+                cookies = conn.getHeaderFields().get("set-cookie");
+            }
+            if (cookies != null) {
+                String cookieName = root.getProtocol().equals("https") ? "SACSID" : "ACSID";
+                for (String cookie : cookies) {
+                    if (cookie.startsWith(cookieName)) {
+                        int semi = cookie.indexOf(';');
+                        mCookie = (semi == -1) ? cookie : cookie.substring(0, semi);
+                        break;
+                    }
                 }
             }
             if (mCookie == null) 
@@ -191,7 +214,10 @@ public class Authenticator {
 
         } catch (Exception e) {
             mErrorMessage = str(R.string.authentication_failed) + " " +
-                    e.getClass().toString() + ":" + e.getLocalizedMessage();
+                    e.getClass().toString() + " / " + e.getLocalizedMessage();
+            for (StackTraceElement s : e.getStackTrace()) {
+                mErrorMessage += s.toString() + "\n";
+            }
         } finally {
             if (conn != null)
                 conn.disconnect();
