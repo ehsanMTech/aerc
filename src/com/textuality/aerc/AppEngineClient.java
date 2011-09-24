@@ -101,11 +101,6 @@ public class AppEngineClient {
      *   to retrieve diagnostic information.
      */
     public Response get(URL uri, Map<String, List<String>> headers) {
-        mErrorMessage = null;
-        if (!mAuthenticator.setup()) {
-            mErrorMessage = mAuthenticator.errorMessage();
-            return null;
-        }
         GET get = new GET(uri, headers, null);
         return getOrPost(get, null);
     }
@@ -122,11 +117,6 @@ public class AppEngineClient {
      *   to retrieve diagnostic information.
      */
     public Response post(URL uri, Map<String, List<String>> headers, byte[] body) {
-        mErrorMessage = null;
-        if (!mAuthenticator.setup()) {
-            mErrorMessage = mAuthenticator.errorMessage();
-            return null;
-        }
         POST post = new POST(uri, headers, body, null);
         return getOrPost(post, null);
     }
@@ -140,6 +130,7 @@ public class AppEngineClient {
     }
 
     private Response getOrPost(Request request, Reporter reporter) {
+        mErrorMessage = null;
         HttpURLConnection conn = null;
         Response response = null;
         report(reporter, str(R.string.sending_request));

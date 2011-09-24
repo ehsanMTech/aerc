@@ -121,14 +121,7 @@ public class Authenticator {
         return mToken;
     }
 
-    /**
-     * Set up for authentication using the account and API passed in the constructor.  Performs IO and 
-     *  networking, thus can't be called on the UI thread.  May interact with the user to retrieve 
-     *  ID and password. If not called explicitly, will be called lazily on the first call to authenticate()
-     *  
-     * @return Whether or not authentication succeeded; if false, errorMessage() provides an explanation
-     */
-    public boolean setup() {
+    private boolean setup() {
 
         // Authent is a 2-step process; first we have to get an auth token, then use it to get a cookie from 
         //  app engine, which is what gets added to future HTTP(S) requests.  Failing to get a token is not
