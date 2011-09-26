@@ -27,6 +27,7 @@ import java.util.Map;
 import android.accounts.Account;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 
 /**
  * Performs GET and POST operations against a Google App Engine app, authenticating with
@@ -47,6 +48,10 @@ public class AppEngineClient {
      * @param context Used, if necessary, to prompt user for authentication
      */
     public AppEngineClient(URL appURI, Account account, Context context) {
+        // HTTP connection reuse which was buggy pre-froyo
+        if (Integer.parseInt(Build.VERSION.SDK) < Build.VERSION_CODES.FROYO) {
+            System.setProperty("http.keepAlive", "false");
+        }
         mAuthenticator = Authenticator.appEngineAuthenticator(context, account, appURI);
         mContext = context;
     }

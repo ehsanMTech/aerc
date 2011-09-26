@@ -27,6 +27,7 @@ import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 
 /**
@@ -65,6 +66,10 @@ public class Authenticator {
         mManager = AccountManager.get(activity);
         mAppURI = appURI;
         mAccount = account;
+        // HTTP connection reuse which was buggy pre-froyo
+        if (Integer.parseInt(Build.VERSION.SDK) < Build.VERSION_CODES.FROYO) {
+            System.setProperty("http.keepAlive", "false");
+        }
     }
 
     /**
@@ -86,6 +91,10 @@ public class Authenticator {
         mAppURI = appURI;
         mToken = authToken;
         mContext = context;
+        // HTTP connection reuse which was buggy pre-froyo
+        if (Integer.parseInt(Build.VERSION.SDK) < Build.VERSION_CODES.FROYO) {
+            System.setProperty("http.keepAlive", "false");
+        }
     }
 
     /**
