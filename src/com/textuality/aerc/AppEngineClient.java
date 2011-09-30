@@ -26,7 +26,6 @@ import java.util.Map;
 
 import android.accounts.Account;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Build;
 
 /**
@@ -55,7 +54,7 @@ public class AppEngineClient {
         mAuthenticator = Authenticator.appEngineAuthenticator(context, account, appURI);
         mContext = context;
     }
-    
+
     /**
      * Constructs a REST client, which may be used for multiple requests, and which will never prompt
      *  the user for authentication input.  This constructor may be called on the UI thread but is 
@@ -71,31 +70,6 @@ public class AppEngineClient {
     }
 
     /**
-     * Performs an HTTP POST request in the background.  This is handled by an AsyncTask and thus may
-     *  be called from the UI thread.
-     *  
-     * @param uri The URI you're sending the POST to
-     * @param headers Any extra HTTP headers you want to send; may be null
-     * @param body The bytes to POST
-     * @param callback Receives progress and completion reports
-     */
-    public void backgroundPost(URL uri, Map<String, List<String>> headers, byte[] body, AppEngineCallback callback) {
-        (new Worker()).execute(new POST(uri, headers, body, callback));
-    }
-
-    /**
-     * Performs an HTTP GET request in the background.  This is handled by an AsyncTask and thus may
-     *  be called from the UI thread.
-     * 
-     * @param uri The URI you're sending the GET to
-     * @param headers Any extra HTTP headers you want to send; may be null
-     * @param callback Receives progress and completion reports
-     */
-    public void backgroundGet(URL uri, Map<String, List<String>> headers, AppEngineCallback callback) {
-        (new Worker()).execute(new GET(uri, headers, callback));
-    }
-
-    /**
      * Performs an HTTP GET request.  The request is performed inline and this method must not
      *  be called from the UI thread.
      *  
@@ -106,8 +80,8 @@ public class AppEngineClient {
      *   to retrieve diagnostic information.
      */
     public Response get(URL uri, Map<String, List<String>> headers) {
-        GET get = new GET(uri, headers, null);
-        return getOrPost(get, null);
+        GET get = new GET(uri, headers);
+        return getOrPost(get);
     }
 
     /**
@@ -122,8 +96,8 @@ public class AppEngineClient {
      *   to retrieve diagnostic information.
      */
     public Response post(URL uri, Map<String, List<String>> headers, byte[] body) {
-        POST post = new POST(uri, headers, body, null);
-        return getOrPost(post, null);
+        POST post = new POST(uri, headers, body);
+        return getOrPost(post);
     }
 
     /**
@@ -134,11 +108,10 @@ public class AppEngineClient {
         return mErrorMessage;
     }
 
-    private Response getOrPost(Request request, Reporter reporter) {
+    private Response getOrPost(Request request) {
         mErrorMessage = null;
         HttpURLConnection conn = null;
         Response response = null;
-        report(reporter, str(R.string.sending_request));
         try {
             conn = (HttpURLConnection) request.uri.openConnection();
             if (!mAuthenticator.authenticate(conn)) {
@@ -156,12 +129,9 @@ public class AppEngineClient {
                     conn.setDoOutput(true);
                     conn.setFixedLengthStreamingMode(payload.length);
                     conn.getOutputStream().write(payload);
-                    report(reporter, str(R.string.sent) + " " + payload.length + " " + str(R.string.bytes));
                 }
                 BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
-                report(reporter, str(R.string.receiving_response));
                 byte[] body = readStream(in);
-                report(reporter, str(R.string.received) + " " + body.length + " " + str(R.string.bytes));
                 response = new Response(conn.getResponseCode(), conn.getHeaderFields(), body);
             }
         } catch (IOException e) {
@@ -175,55 +145,24 @@ public class AppEngineClient {
         return response;
     }
 
-    // Have to make a new AsyncTask & HttpURLConnection for each request
-    private class Worker extends AsyncTask<Request, String, Response> implements Reporter {
-
-        private AppEngineCallback mCustomer;
-
-        @Override
-        protected Response doInBackground(Request... params) {
-            Request request = params[0];
-            mCustomer = request.callback;
-            return getOrPost(request, this);
-        }
-
-        public void report(String message) {
-            publishProgress(message);
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            mCustomer.reportProgress(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(Response response) {
-            if (response == null) 
-                mCustomer.reportError(mErrorMessage);
-            else 
-                mCustomer.done(response.status, response.headers, response.body);
-        }
-    }
-
     // request structs
     private class Request {
         public URL uri;
         public Map<String, List<String>> headers;
-        public AppEngineCallback callback;
-        public Request(URL uri, Map<String, List<String>> headers, AppEngineCallback callback) {
-            this.uri = uri; this.headers = headers; this.callback = callback;
+        public Request(URL uri, Map<String, List<String>> headers) {
+            this.uri = uri; this.headers = headers;
         }
     }
     private class POST extends Request {
         public byte[] body;
-        public POST(URL uri, Map<String, List<String>> headers, byte[] body, AppEngineCallback callback) {
-            super(uri, headers, callback);
+        public POST(URL uri, Map<String, List<String>> headers, byte[] body) {
+            super(uri, headers);
             this.body = body; 
         }
     }
     private class GET extends Request {
-        public GET(URL uri, Map<String, List<String>> headers, AppEngineCallback callback) {
-            super(uri, headers, callback);
+        public GET(URL uri, Map<String, List<String>> headers) {
+            super(uri, headers);
         }
     }
 
@@ -238,16 +177,8 @@ public class AppEngineClient {
         return out.toByteArray();
     }
 
-    private interface Reporter { 
-        public void report(String message); 
-    }
-
     private String str(int id) {
         return mContext.getString(id);
-    }
-    private void report(Reporter reporter, String message) {
-        if (reporter != null)
-            reporter.report(message);
     }
 }
 
