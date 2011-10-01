@@ -39,7 +39,7 @@ public class AppEngineClient {
     private String mErrorMessage;
 
     /**
-     * Constructs a REST client, which may be used for multiple requests.  This constructor may be 
+     * Constructs a client, which may be used for multiple requests.  This constructor may be 
      *  called on the UI thread.
      * 
      * @param appURI The URI of the App Engine app you want to interact with, e.g. your-app.appspot.com
@@ -56,7 +56,7 @@ public class AppEngineClient {
     }
 
     /**
-     * Constructs a REST client, which may be used for multiple requests, and which will never prompt
+     * Constructs a client, which may be used for multiple requests, and which will never prompt
      *  the user for authentication input.  This constructor may be called on the UI thread but is 
      *  suitable for use on background threads with no access to an Activity. 
      * 
@@ -88,7 +88,7 @@ public class AppEngineClient {
      * Performs an HTTP POST request.  The request is performed inline and this method must not
      *  be called from the UI thread.
      *  
-     * @param uri The URI you're sending the GET to
+     * @param uri The URI you're sending the POST to
      * @param headers Any extra HTTP headers you want to send; may be null
      * @param body The request body to transmit
      * @return a Response structure containing the status, headers, and body. Returns null if the request 

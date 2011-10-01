@@ -48,10 +48,9 @@ public class Authenticator {
      * Creates a new Google App Engine authenticator for the app at the indicated URI using the indicated Account.
      * 
      * This constructor does not actually perform authentication, so it could in principle be called on the UI
-     *  thread.  Authentication is performed lazily on the first call to authenticate(), or when explicitly 
-     *  requested via setup(). Authentication is based on cookies provided by App Engine, which experience 
-     *  suggests have a lifetime of about 24 hours, starting from the first call to setup().  Thus a single 
-     *  Authenticator instance ought to be adequate to serve the needs of most REST dialogues.
+     *  thread.  Authentication is performed lazily on the first call to authenticate() or token(). Authentication 
+     *  is based on cookies provided by App Engine, which experience suggests have a lifetime of about 24 hours. 
+     *  Thus a single Authenticator instance ought to be adequate to serve the needs of most REST dialogues.
      * 
      * @param activity Activity to be used, if necessary, to prompt for authentication
      * @param account Which android.accounts.Account to authenticate with
@@ -77,7 +76,7 @@ public class Authenticator {
      *  AccountManager authToken. The form of the authenticator is guaranteed never to interact with the user, 
      *  and as such is usable from a background thread, for example in a Service.   You can get an
      *  authToken via an AccountManager call, or by creating an Authenticator in a context where
-     *  user interaction is acceptable, and getting a token with token() after having called setup().
+     *  user interaction is acceptable, and getting a token with token().
      *  
      * @param context Used to retrieve strings for display
      * @param appURI
@@ -120,7 +119,9 @@ public class Authenticator {
     }
 
     /**
-     * Returns an Authentication token which has been set up and is ready for use.
+     * Returns an Authentication token which has been set up and is ready for use.  This may
+     *  require user interaction and network IO and can't be called on the UI thread.
+     *  
      * @return the token, or null if authentication failed, in which case diagnostics are available
      *  via errorMessage().
      */
@@ -197,9 +198,11 @@ public class Authenticator {
             conn = (HttpURLConnection) root.openConnection();
             conn.setInstanceFollowRedirects(false);
             eatStream(new BufferedInputStream(conn.getInputStream()));
+            
+            // in Froyo, the cookie support classes aren't really there, so let's do it by hand
             List<String> cookies = conn.getHeaderFields().get("Set-Cookie");
             if (cookies == null) {
-                cookies = conn.getHeaderFields().get("set-cookie");
+                cookies = conn.getHeaderFields().get("set-cookie"); // thanks, Samsung
             }
             if (cookies != null) {
                 String cookieName = root.getProtocol().equals("https") ? "SACSID" : "ACSID";
