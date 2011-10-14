@@ -171,7 +171,7 @@ public class Authenticator {
             Bundle bundle = result.getResult();
             mToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
         } catch (Exception e) {
-            mErrorMessage = str(R.string.authentication_failed) + ": " + e.getClass() + " / " + e.getLocalizedMessage();
+            mErrorMessage = str(R.string.aerc_authentication_failed) + ": " + e.getClass() + " / " + e.getLocalizedMessage();
             for (StackTraceElement s : e.getStackTrace()) {
                 mErrorMessage += s.toString() + "\n";
             }
@@ -179,7 +179,7 @@ public class Authenticator {
 
         if (mToken == null) {
             if (mErrorMessage == null)
-                mErrorMessage = str(R.string.no_auth_token);
+                mErrorMessage = str(R.string.aerc_no_auth_token);
             return false;
         } else {
             return true;
@@ -215,10 +215,10 @@ public class Authenticator {
                 }
             }
             if (mCookie == null) 
-                mErrorMessage = str(R.string.authentication_failed) + ": " + str(R.string.no_cookie); 
+                mErrorMessage = str(R.string.aerc_authentication_failed) + ": " + str(R.string.aerc_no_cookie); 
 
         } catch (Exception e) {
-            mErrorMessage = str(R.string.authentication_failed) + " " +
+            mErrorMessage = str(R.string.aerc_authentication_failed) + " " +
                     e.getClass().toString() + " / " + e.getLocalizedMessage();
             for (StackTraceElement s : e.getStackTrace()) {
                 mErrorMessage += s.toString() + "\n";

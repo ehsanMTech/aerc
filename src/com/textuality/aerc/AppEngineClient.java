@@ -115,7 +115,7 @@ public class AppEngineClient {
         try {
             conn = (HttpURLConnection) request.uri.openConnection();
             if (!mAuthenticator.authenticate(conn)) {
-                mErrorMessage = str(R.string.authentication_failed) + ": " + mAuthenticator.errorMessage();
+                mErrorMessage = str(R.string.aerc_authentication_failed) + ": " + mAuthenticator.errorMessage();
             } else {
                 if (request.headers != null) {
                     for (String header : request.headers.keySet()) {
@@ -137,7 +137,7 @@ public class AppEngineClient {
         } catch (IOException e) {
             e.printStackTrace(System.err);
             mErrorMessage = ((request instanceof POST) ? "POST " : "GET ") +
-                    str(R.string.failed) + ": " + e.getLocalizedMessage();
+                    str(R.string.aerc_failed) + ": " + e.getLocalizedMessage();
         } finally {
             if (conn != null)
                 conn.disconnect();
