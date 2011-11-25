@@ -4,4 +4,5 @@
     <string name="aerc_failed">failed</string>
     <string name="aerc_no_auth_token">Couldn\'t get auth token</string>
     <string name="aerc_no_cookie">App engine provided no cookie</string>
+    <string name="aerc_no_network">No network connection</string>
 </resources>

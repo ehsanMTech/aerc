@@ -29,6 +29,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * Performs authentication against of HTTP requests using a Google Account already
@@ -170,6 +171,8 @@ public class Authenticator {
         try {
             Bundle bundle = result.getResult();
             mToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+        } catch (IOException e) {
+            mErrorMessage = str(R.string.aerc_authentication_failed) + ": " + str(R.string.aerc_no_network); 
         } catch (Exception e) {
             mErrorMessage = str(R.string.aerc_authentication_failed) + ": " + e.getClass() + " / " + e.getLocalizedMessage();
             for (StackTraceElement s : e.getStackTrace()) {
@@ -198,7 +201,7 @@ public class Authenticator {
             conn = (HttpURLConnection) root.openConnection();
             conn.setInstanceFollowRedirects(false);
             eatStream(new BufferedInputStream(conn.getInputStream()));
-            
+
             // in Froyo, the cookie support classes aren't really there, so let's do it by hand
             List<String> cookies = conn.getHeaderFields().get("Set-Cookie");
             if (cookies == null) {
@@ -217,6 +220,8 @@ public class Authenticator {
             if (mCookie == null) 
                 mErrorMessage = str(R.string.aerc_authentication_failed) + ": " + str(R.string.aerc_no_cookie); 
 
+        } catch (IOException e) {
+            mErrorMessage = str(R.string.aerc_authentication_failed) + ": " + str(R.string.aerc_no_network); 
         } catch (Exception e) {
             mErrorMessage = str(R.string.aerc_authentication_failed) + " " +
                     e.getClass().toString() + " / " + e.getLocalizedMessage();
