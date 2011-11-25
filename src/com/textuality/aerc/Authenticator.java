@@ -61,7 +61,7 @@ public class Authenticator {
     }
 
     private Authenticator(Context activity, Account account, URL appURI) {
-        mContext = (Activity) activity;
+        mContext = activity;
         mManager = AccountManager.get(activity);
         mAppURI = appURI;
         mAccount = account;

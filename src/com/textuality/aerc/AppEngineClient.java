@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -129,10 +130,15 @@ public class AppEngineClient {
                     conn.setDoOutput(true);
                     conn.setFixedLengthStreamingMode(payload.length);
                     conn.getOutputStream().write(payload);
+                    int status = conn.getResponseCode();
+                    if (status / 100 != 2)
+                        response = new Response(status, new Hashtable<String, List<String>>(), conn.getResponseMessage().getBytes());
                 }
-                BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
-                byte[] body = readStream(in);
-                response = new Response(conn.getResponseCode(), conn.getHeaderFields(), body);
+                if (response == null) {
+                    BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
+                    byte[] body = readStream(in);
+                    response = new Response(conn.getResponseCode(), conn.getHeaderFields(), body);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace(System.err);
