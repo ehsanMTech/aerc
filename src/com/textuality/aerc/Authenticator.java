@@ -29,7 +29,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 
 /**
  * Performs authentication against of HTTP requests using a Google Account already
